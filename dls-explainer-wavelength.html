@@ -6,17 +6,17 @@
 <title>DLS — Laser Wavelength</title>
 <style>
   :root {
-    --maroon:      #1f1f1f;
-    --maroon-dk:   #000000;
-    --accent:      #333333;
-    --pink:        #9a9a9a;
-    --pink-lt:     #d4d4d4;
+    --maroon:      #7a1a2e;
+    --maroon-dk:   #5e141f;
+    --accent:      #b02a37;
+    --pink:        #c75c6e;
+    --pink-lt:     #e9b8c2;
     --ink:         #231f20;
     --muted:       #6b6f76;
     --line:        #e4e4e7;
     --paper:       #ffffff;
     --bg:          #f4f4f5;
-    --trace:       #333333;
+    --trace:       #b02a37;
     --acf:         #2e6b5e;
   }
   * { box-sizing: border-box; }
@@ -36,7 +36,7 @@
   .brandbar .backbtn { margin-left:14px; display:inline-flex; align-items:center; gap:6px;
     font-family:Barlow,'Segoe UI',sans-serif; font-size:13px; font-weight:600; color:var(--maroon);
     background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:7px 12px; cursor:pointer; }
-  .brandbar .backbtn:hover { border-color:var(--maroon); background:#f4f4f4; }
+  .brandbar .backbtn:hover { border-color:var(--maroon); background:#fbf4f5; }
 
   .wrap { margin: 0 auto; padding: 22px 28px 56px; }
   .intro h1 { font-family: Georgia, serif; font-weight:400; font-size: clamp(22px,4.5vw,30px); color: var(--maroon); margin:4px 0 8px; line-height:1.15; }
@@ -94,12 +94,12 @@
   .fieldgrid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
   .hint { color:var(--muted); font-size:11.5px; margin-top:10px; }
   .err { color:var(--accent); font-size:11.5px; margin-top:10px; min-height:14px; }
-  /* checkboxes (fixed-angle variant) */
+  /* checkboxes (nanobrook variant) */
   .angleopts { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
   .angleopt { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--line);
     border-radius:8px; cursor:pointer; transition:border-color .15s, background .15s; }
   .angleopt:hover { border-color:var(--maroon-dk); }
-  .angleopt.on { border-color:var(--maroon); background:#f4f4f4; }
+  .angleopt.on { border-color:var(--maroon); background:#fbf4f5; }
   .angleopt input { width:18px; height:18px; accent-color:var(--maroon); }
   .angleopt .t { font-weight:600; }
   .angleopt .d { color:var(--muted); font-size:12.5px; }
@@ -110,14 +110,29 @@
   @media (max-width:759px){ .plotrow{ flex-direction:column; gap:0; } }
   .jumplink{ display:inline-block; margin-top:14px; font-size:12.5px; font-weight:600; color:var(--maroon);
     text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:6px 12px; }
-  .jumplink:hover{ border-color:var(--maroon); background:#f4f4f4; }
+  .jumplink:hover{ border-color:var(--maroon); background:#fbf4f5; }
   html{ scroll-behavior:smooth; }
 </style>
 
 </head>
 <body>
   <div class="brandbar">
-    <span class="logolink" aria-hidden="true"></span>
+    <a class="logolink" href="https://www.brookhaveninstruments.com" target="_blank" rel="noopener" title="Visit brookhaveninstruments.com">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 190" role="img" aria-label="Brookhaven Instruments">
+      <g transform="translate(8,5)">
+        <circle cx="66.5" cy="71.1" r="16.3" fill="#7a1a2e"/><circle cx="97.8" cy="54.9" r="12.8" fill="#7a1a2e"/>
+        <circle cx="52.6" cy="102.8" r="12.7" fill="#7a1a2e"/><circle cx="125.8" cy="48.6" r="9.4" fill="#7a1a2e"/>
+        <circle cx="48.3" cy="152.0" r="7.4" fill="#7a1a2e"/><circle cx="147.5" cy="48.7" r="7.3" fill="#7a1a2e"/>
+        <circle cx="48.3" cy="170.7" r="5.4" fill="#7a1a2e"/><circle cx="164.7" cy="48.7" r="5.4" fill="#7a1a2e"/>
+        <circle cx="107.6" cy="108.9" r="16.1" fill="#6a7278"/><circle cx="121.7" cy="77.1" r="12.6" fill="#6a7278"/>
+        <circle cx="76.5" cy="125.0" r="12.5" fill="#6a7278"/><circle cx="48.3" cy="131.2" r="9.3" fill="#6a7278"/>
+        <circle cx="26.7" cy="131.4" r="7.2" fill="#6a7278"/><circle cx="126.0" cy="28.0" r="7.3" fill="#6a7278"/>
+        <circle cx="9.4" cy="131.1" r="5.4" fill="#6a7278"/><circle cx="126.0" cy="9.3" r="5.3" fill="#6a7278"/>
+      </g>
+      <text x="200" y="88"  font-family="'Barlow',-apple-system,'Segoe UI',sans-serif" font-weight="600" font-size="46" fill="#231f20">Brookhaven</text>
+      <text x="200" y="140" font-family="'Barlow',-apple-system,'Segoe UI',sans-serif" font-weight="600" font-size="46" fill="#231f20">Instruments</text>
+    </svg>
+    </a>
     <div class="tag">DLS · Wavelength</div>
     <button class="backbtn" onclick="history.back()" title="Back to previous page">&larr; Back</button>
   </div>
@@ -142,7 +157,7 @@
       <h2>Intensity vs. time</h2>
       <p class="sub">Count-rate history: speckle fluctuations from diffusing particles.</p>
       <div class="plotbox"><canvas id="intensity"></canvas></div>
-      <div class="legend"><span><span class="sw" id="traceSwatch" style="background:#333333"></span>I(q, t)</span><span id="speedNote">&mdash;</span></div>
+      <div class="legend"><span><span class="sw" id="traceSwatch" style="background:#b02a37"></span>I(q, t)</span><span id="speedNote">&mdash;</span></div>
     </div>
 
     <div class="card">
@@ -166,7 +181,7 @@ let diam=88e-9;
 let lambda0=640e-9;
 let thetaRad=Math.PI/2;
 let TAU_MIN=1e-6, TAU_MAX=0.300;
-let traceColor='#333333';
+let traceColor='#b02a37';
 
 function qVec(){ return (4*Math.PI*n/lambda0)*Math.sin(thetaRad/2); }
 function recompute(){ const q=qVec(); const Dt=kB*T/(3*Math.PI*eta*diam); const Gamma=Dt*q*q; return {q,Dt,Gamma,tauC:1/Gamma}; }
@@ -232,16 +247,16 @@ function drawACF(now){
     const wig=0.6*Math.sin(ph*3.1+t*0.8)+0.4*Math.sin(ph*7.7+t*1.3)+0.3*Math.sin(ph*1.7-t*0.5);
     const y=YY(ideal+amp*wig); if(first){ctx.moveTo(X(lt),y);first=false;}else ctx.lineTo(X(lt),y); }
   ctx.stroke();
-  ctx.strokeStyle='rgba(40,40,40,.55)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();first=true;
+  ctx.strokeStyle='rgba(122,26,46,.55)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();first=true;
   for(let px=x0;px<=x1;px++){ const lt=lMin+(px-x0)/(x1-x0)*(lMax-lMin); const tau=Math.pow(10,lt);
     const y=YY(Math.exp(-2*Gamma*tau)); if(first){ctx.moveTo(px,y);first=false;}else ctx.lineTo(px,y);} ctx.stroke();ctx.setLineDash([]);
   const tHalf=Math.log(2)/(2*Gamma);
   if(tHalf>=TAU_MIN&&tHalf<=TAU_MAX){ const x=X(Math.log10(tHalf));
-    ctx.strokeStyle='rgba(90,90,90,.5)';ctx.setLineDash([4,4]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y0);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle='#333333';ctx.textAlign='center';ctx.font='10px Barlow, sans-serif';ctx.fillText('\u00bd decay',x,y1+10); }
+    ctx.strokeStyle='rgba(176,42,55,.5)';ctx.setLineDash([4,4]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y0);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#b02a37';ctx.textAlign='center';ctx.font='10px Barlow, sans-serif';ctx.fillText('\u00bd decay',x,y1+10); }
   // half-decay outside window hints
-  if(tHalf<TAU_MIN){ ctx.fillStyle='#333333';ctx.textAlign='left';ctx.font='italic 10px Barlow';ctx.fillText('\u00bd decay < first delay',x0+4,y1+10); }
-  if(tHalf>TAU_MAX){ ctx.fillStyle='#333333';ctx.textAlign='right';ctx.font='italic 10px Barlow';ctx.fillText('\u00bd decay > last delay',x1-4,y1+10); }
+  if(tHalf<TAU_MIN){ ctx.fillStyle='#b02a37';ctx.textAlign='left';ctx.font='italic 10px Barlow';ctx.fillText('\u00bd decay < first delay',x0+4,y1+10); }
+  if(tHalf>TAU_MAX){ ctx.fillStyle='#b02a37';ctx.textAlign='right';ctx.font='italic 10px Barlow';ctx.fillText('\u00bd decay > last delay',x1-4,y1+10); }
 }
 
 function loop(now){
