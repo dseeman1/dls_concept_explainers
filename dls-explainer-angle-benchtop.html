@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLS: Fixed Angles (Benchtop)</title>
+<style>
+  :root {
+    --maroon:      #1f1f1f;
+    --maroon-dk:   #000000;
+    --accent:      #333333;
+    --pink:        #9a9a9a;
+    --pink-lt:     #d4d4d4;
+    --ink:         #231f20;
+    --muted:       #6b6f76;
+    --line:        #e4e4e7;
+    --paper:       #ffffff;
+    --bg:          #f4f4f5;
+    --trace:       #333333;
+    --acf:         #2e6b5e;
+  }
+  * { box-sizing: border-box; }
+  html,body { margin:0; }
+  body {
+    font-family: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
+  }
+  .brandbar {
+    background: var(--paper); border-bottom:1px solid var(--line);
+    padding: 12px 20px; display:flex; align-items:center; gap:14px;
+  }
+  .brandbar svg { height:42px; width:auto; display:block; }
+  .brandbar .logolink { display:block; line-height:0; text-decoration:none; border-radius:4px; }
+  .brandbar .logolink:hover { opacity:.82; }
+  .brandbar .tag { margin-left:auto; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--maroon); font-weight:600; }
+  .brandbar .backbtn { margin-left:14px; display:inline-flex; align-items:center; gap:6px;
+    font-family:Barlow,'Segoe UI',sans-serif; font-size:13px; font-weight:600; color:var(--maroon);
+    background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:7px 12px; cursor:pointer; }
+  .brandbar .backbtn:hover { border-color:var(--maroon); background:#f4f4f4; }
+
+  .wrap { margin: 0 auto; padding: 22px 28px 56px; }
+  .intro h1 { font-family: Georgia, serif; font-weight:400; font-size: clamp(22px,4.5vw,30px); color: var(--maroon); margin:4px 0 8px; line-height:1.15; }
+  .intro p { color:#3a3a3d; font-size:14.5px; line-height:1.6; margin:0 0 6px; text-align:justify; }
+  .params { color: var(--muted); font-size:13px; margin-top:8px; text-align:justify; }
+  .params b { color: var(--maroon-dk); }
+
+  .card { background: var(--paper); border:1px solid var(--line); border-radius:6px; padding: 20px; margin: 18px 0; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .card h2 { font-family: Georgia, serif; font-weight:400; font-size:17px; color: var(--maroon); margin:0 0 4px; }
+  .card .sub { color: var(--muted); font-size:12.5px; margin:0 0 14px; text-align:justify; }
+
+  .sizeHead { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .sizeHead .lab { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  .sizeHead .val { font-family:Georgia,serif; font-size:30px; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .sizeHead .unit { color:var(--muted); font-size:14px; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:5px; margin:16px 0 6px; border-radius:5px; outline:none;
+    background: linear-gradient(90deg, var(--maroon) var(--fill,50%), #dcdcdf var(--fill,50%)); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:22px;height:22px;border-radius:50%; background:#fff;border:4px solid var(--maroon);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  input[type=range]::-moz-range-thumb{ width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid var(--maroon);cursor:pointer; }
+  .ticks{ display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+
+  /* particle illustration */
+  .yourcell { text-align:center; margin:20px 0 6px; }
+  .yourcell .dh { font-family:Georgia,serif; font-style:italic; font-size:15px; margin-bottom:10px; }
+  .pwrap { height:130px; display:flex; align-items:center; justify-content:center; }
+  .particle-you { border-radius:50%; border:2.5px solid #111; background:#fff; box-shadow: inset -6px -6px 14px rgba(0,0,0,.06); }
+  .refrow { display:flex; justify-content:center; align-items:flex-end; gap:64px; margin-top:14px; padding-top:16px; border-top:1px dashed var(--line); }
+  .refcell { text-align:center; }
+  .refcell .dh { font-family:Georgia,serif; font-style:italic; font-size:14px; margin-bottom:8px; }
+  .refbox { height:96px; display:flex; align-items:center; justify-content:center; }
+  .particle-ref { border-radius:50%; border:2px dashed #555; background: radial-gradient(circle at 35% 30%, var(--pink-lt), var(--pink) 55%, var(--maroon) 100%); }
+  .refcell .speed { font-family:Georgia,serif; font-style:italic; font-size:20px; color:var(--maroon); margin-top:8px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .stat{ background:var(--paper); padding:12px 14px; }
+  .stat .k{ color:var(--muted); font-size:10px; letter-spacing:.13em; text-transform:uppercase; }
+  .stat .v{ font-size:17px; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .stat .v small{ color:var(--muted); font-size:11px; }
+
+  .plotbox { width:100%; }
+  canvas{ display:block; width:100%; height:auto; }
+  .legend{ display:flex; gap:20px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:8px; }
+  .sw{ display:inline-block; width:14px; height:3px; vertical-align:middle; margin-right:6px; border-radius:2px; }
+  .eqn{ background:#faf6f7; border:1px solid #f0e2e4; border-radius:6px; padding:12px 16px; font-family:Georgia,serif; font-size:15px; color:var(--maroon-dk); text-align:center; margin:0 0 12px;}
+  footer{ color:var(--muted); font-size:11.5px; line-height:1.65; border-top:1px solid var(--line); padding-top:16px; margin-top:8px; }
+
+  /* text inputs (delay variant) */
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field label { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .field .inrow { display:flex; align-items:center; gap:8px; }
+  .field input[type=text]{ width:120px; font-family:Georgia,serif; font-size:22px; color:var(--accent);
+    border:1px solid var(--line); border-radius:6px; padding:6px 10px; background:var(--paper); }
+  .field input[type=text]:focus{ outline:none; border-color:var(--maroon); }
+  .field .u { color:var(--muted); font-size:13px; }
+  .fieldgrid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .hint { color:var(--muted); font-size:11.5px; margin-top:10px; }
+  .err { color:var(--accent); font-size:11.5px; margin-top:10px; min-height:14px; }
+  /* checkboxes (fixed-angle variant) */
+  .angleopts { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .angleopt { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--line);
+    border-radius:8px; cursor:pointer; transition:border-color .15s, background .15s; }
+  .angleopt:hover { border-color:var(--maroon-dk); }
+  .angleopt.on { border-color:var(--maroon); background:#f4f4f4; }
+  .angleopt input { width:18px; height:18px; accent-color:var(--maroon); }
+  .angleopt .t { font-weight:600; }
+  .angleopt .d { color:var(--muted); font-size:12.5px; }
+  .swatchdot { width:12px;height:12px;border-radius:50%; margin-right:2px; display:inline-block; vertical-align:middle;}
+  /* two plots side by side on wider screens; stack on mobile */
+  .plotrow{ display:flex; gap:18px; align-items:stretch; max-width:1100px; }
+  .plotrow > .card{ flex:1 1 0; min-width:0; margin:18px 0; }
+  @media (max-width:759px){ .plotrow{ flex-direction:column; gap:0; } }
+  .jumplink{ display:inline-block; margin-top:14px; font-size:12.5px; font-weight:600; color:var(--maroon);
+    text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:6px 12px; }
+  .jumplink:hover{ border-color:var(--maroon); background:#f4f4f4; }
+  html{ scroll-behavior:smooth; }
+</style>
+
+</head>
+<body>
+  <div class="brandbar">
+    <span class="logolink" aria-hidden="true"></span>
+    <div class="tag">DLS · Benchtop</div>
+    <button class="backbtn" onclick="history.back()" title="Back to previous page">&larr; Back</button>
+  </div>
+  <div class="wrap">
+    <div class="intro"><h1>Fixed Detection Angles on a Benchtop DLS</h1>
+      <p>A <b>benchtop DLS</b> measures at fixed detection angles rather than sweeping continuously. Three configurations are available below: forward scatter (15&deg;), right-angle (90&deg;), and backscatter (173&deg;). Selecting each one shows how the decay rate &Gamma; = D<sub>t</sub>q<sup>2</sup> changes with angle for the same 88 nm particle.</p>
+      <p class="params">Fixed: <b>88 nm</b> particle &middot; <b>640 nm</b> laser &middot; correlator <b>1 &micro;s</b> to <b>300 ms</b> &middot; water at <b>25 &deg;C</b>. Variable: detection angle, as selected on a benchtop DLS.</p></div>
+    <div class="card">
+      <div class="sizeHead" style="margin-bottom:6px"><span class="lab">Detection configuration</span></div>
+      <div class="angleopts" id="angleopts">
+        <label class="angleopt" data-ang="15"><input type="radio" name="cfg" value="15"><span><span class="t">Forward scatter: 15&deg;</span><br><span class="d">Most sensitive to larger particles &amp; aggregates</span></span></label>
+        <label class="angleopt on" data-ang="90"><input type="radio" name="cfg" value="90" checked><span><span class="t">Right angle: 90&deg;</span><br><span class="d">Classic DLS geometry; balanced response</span></span></label>
+        <label class="angleopt" data-ang="173"><input type="radio" name="cfg" value="173"><span><span class="t">Backscatter: 173&deg;</span><br><span class="d">Works in turbid samples; best for small particles</span></span></label>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <a class="jumplink" href="#plots">Jump to graphs &darr;</a>
+
+    <div class="plotrow" id="plots">
+    <div class="card">
+      <h2>Intensity vs. time</h2>
+      <p class="sub">Count-rate history: speckle fluctuations from diffusing particles.</p>
+      <div class="plotbox"><canvas id="intensity"></canvas></div>
+      <div class="legend"><span><span class="sw" id="traceSwatch" style="background:#333333"></span>I(q, t)</span><span id="speedNote">&mdash;</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Autocorrelation function</h2>
+      <p class="sub">The time when decay starts indicates the mean size; the curve shifts right for larger, slower particles.</p>
+      <div class="eqn">g<sup>2</sup>(&tau;) &minus; 1 = &beta; &middot; exp(&minus;2&Gamma;&tau;)&nbsp;&nbsp;,&nbsp;&nbsp; &Gamma; = D<sub>t</sub> &middot; q<sup>2</sup></div>
+      <div class="plotbox"><canvas id="acf"></canvas></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#111"></span>measured g<sup>2</sup>(&tau;) &minus; 1</span>
+        <span><span class="sw" style="background:var(--maroon)"></span>ideal fit</span>
+        <span id="tauAxisNote">&tau; axis (log)</span>
+      </div>
+    </div>
+    </div>
+  </div>
+<script>
+
+const kB=1.380649e-23, T=298.15, eta=0.890e-3, n=1.330;
+// mutable state (variants overwrite as needed)
+let diam=88e-9;
+let lambda0=640e-9;
+let thetaRad=Math.PI/2;
+let TAU_MIN=1e-6, TAU_MAX=0.300;
+let traceColor='#333333';
+
+function qVec(){ return (4*Math.PI*n/lambda0)*Math.sin(thetaRad/2); }
+function recompute(){ const q=qVec(); const Dt=kB*T/(3*Math.PI*eta*diam); const Gamma=Dt*q*q; return {q,Dt,Gamma,tauC:1/Gamma}; }
+
+// sum-of-sines speckle modes
+const NMODES=8; let modes=[];
+function buildModes(){ modes=[];
+  for(let k=0;k<NMODES;k++) modes.push({detune:0.6+1.6*Math.random(),phase:Math.random()*2*Math.PI,amp:0.5+Math.random()});
+  modes.push({detune:0.05,phase:Math.random()*2*Math.PI,amp:1.4});
+}
+buildModes();
+
+// brightness vs size (count-rate baseline in plot units)
+const D_MIN=0.5e-9, D_MAX=1000e-9;
+function brightness(){ const f=Math.log(diam/D_MIN)/Math.log(D_MAX/D_MIN); return 1.2+4.6*Math.pow(Math.max(0,Math.min(1,f)),1.15); }
+
+function fmtTime(s){
+  if(s>=1) return s.toFixed(2)+' s';
+  if(s>=1e-3) return (s*1e3).toFixed(2)+' ms';
+  if(s>=1e-6) return (s*1e6).toFixed(2)+' \u00b5s';
+  return (s*1e9).toFixed(1)+' ns';
+}
+function fmtSize(d){ const nm=d*1e9;
+  if(nm>=1000) return {v:(nm/1000).toFixed(3),u:'\u00b5m'};
+  if(nm>=100) return {v:nm.toFixed(0),u:'nm'};
+  if(nm>=10) return {v:nm.toFixed(1),u:'nm'};
+  return {v:nm.toFixed(2),u:'nm'}; }
+
+const CW=680, CH_I=150, CH_A=220;
+function prep(cv,hL){ const dpr=window.devicePixelRatio||1; cv.width=CW*dpr; cv.height=hL*dpr;
+  cv.style.aspectRatio=CW+' / '+hL; const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return {ctx,w:CW,h:hL}; }
+
+const NPTS=300; let simClock=0, lastT=performance.now();
+function intensityAt(t,tauC,mean){ const w0=2*Math.PI/(tauC*3); let s=0,norm=0;
+  for(const m of modes){ s+=m.amp*Math.sin(w0*m.detune*t+m.phase); norm+=m.amp; } s/=norm;
+  return mean + 0.45*mean*s; }
+
+// cosmetic ACF measurement noise that averages away while settings are held
+let noiseSettle=0, lastKey='', acfSeed=Math.random()*1000;
+function settleKey(){ return diam.toExponential(3)+'|'+lambda0+'|'+thetaRad.toFixed(4)+'|'+TAU_MIN+'|'+TAU_MAX; }
+
+function tauLabel(us){ return us>=1e6?(us/1e6)+'s':us>=1e3?(us/1e3)+'ms':us>=1?us+'\u00b5s':(us*1000)+'ns'; }
+
+function drawACF(now){
+  const cv=document.getElementById('acf'); const {ctx,w,h}=prep(cv,CH_A); const {Gamma}=recompute();
+  const padL=46,padR=14,padT=12,padB=30; const x0=padL,x1=w-padR,y0=h-padB,y1=padT;
+  const lMin=Math.log10(TAU_MIN),lMax=Math.log10(TAU_MAX);
+  const X=lt=>x0+(lt-lMin)/(lMax-lMin)*(x1-x0);
+  const YY=v=>{ const c=Math.max(-0.08,Math.min(1.12,v)); return y0+c*(y1-y0); };
+  ctx.clearRect(0,0,w,h); ctx.font='10px Barlow, sans-serif';
+  const e0=Math.ceil(lMin), e1=Math.floor(lMax);
+  for(let e=e0;e<=e1;e++){ const x=X(e);
+    ctx.strokeStyle='#eceaec';ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y0);ctx.stroke();
+    ctx.fillStyle='#9a9aa0';ctx.textAlign='center'; ctx.fillText(tauLabel(Math.pow(10,e)*1e6),x,y0+16); }
+  for(let g=0;g<=1.0001;g+=0.25){ const y=YY(g);
+    ctx.strokeStyle='#eceaec';ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();
+    ctx.fillStyle='#9a9aa0';ctx.textAlign='right';ctx.fillText(g.toFixed(2),x0-8,y+3); }
+  const t=(now||0)/1000;
+  ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();let first=true; const NC=140;
+  for(let k=0;k<NC;k++){ const lt=lMin+(k/(NC-1))*(lMax-lMin); const tau=Math.pow(10,lt);
+    const ideal=Math.exp(-2*Gamma*tau); const bias=(lt-lMin)/(lMax-lMin);
+    const amp=0.05*(0.15+1.6*bias)*(1-0.85*noiseSettle); const ph=acfSeed+lt*7.3;
+    const wig=0.6*Math.sin(ph*3.1+t*0.8)+0.4*Math.sin(ph*7.7+t*1.3)+0.3*Math.sin(ph*1.7-t*0.5);
+    const y=YY(ideal+amp*wig); if(first){ctx.moveTo(X(lt),y);first=false;}else ctx.lineTo(X(lt),y); }
+  ctx.stroke();
+  ctx.strokeStyle='rgba(40,40,40,.55)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();first=true;
+  for(let px=x0;px<=x1;px++){ const lt=lMin+(px-x0)/(x1-x0)*(lMax-lMin); const tau=Math.pow(10,lt);
+    const y=YY(Math.exp(-2*Gamma*tau)); if(first){ctx.moveTo(px,y);first=false;}else ctx.lineTo(px,y);} ctx.stroke();ctx.setLineDash([]);
+  const tHalf=Math.log(2)/(2*Gamma);
+  if(tHalf>=TAU_MIN&&tHalf<=TAU_MAX){ const x=X(Math.log10(tHalf));
+    ctx.strokeStyle='rgba(90,90,90,.5)';ctx.setLineDash([4,4]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y0);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#333333';ctx.textAlign='center';ctx.font='10px Barlow, sans-serif';ctx.fillText('\u00bd decay',x,y1+10); }
+  // half-decay outside window hints
+  if(tHalf<TAU_MIN){ ctx.fillStyle='#333333';ctx.textAlign='left';ctx.font='italic 10px Barlow';ctx.fillText('\u00bd decay < first delay',x0+4,y1+10); }
+  if(tHalf>TAU_MAX){ ctx.fillStyle='#333333';ctx.textAlign='right';ctx.font='italic 10px Barlow';ctx.fillText('\u00bd decay > last delay',x1-4,y1+10); }
+}
+
+function loop(now){
+  const {tauC,Gamma,q}=recompute(); const mean=brightness();
+  const key=settleKey();
+  if(key!==lastKey){ noiseSettle=0; lastKey=key; acfSeed=Math.random()*1000; }
+  else { noiseSettle=Math.min(1,noiseSettle+(now-lastT)/3000); }
+  const windowS=Math.min(Math.max(tauC*30,0.04),6); const dtPerPoint=windowS/NPTS;
+  let realDt=(now-lastT)/1000; lastT=now; realDt=Math.min(realDt,0.05);
+  const simPerSec=Math.min(windowS/1.6,50*dtPerPoint); simClock+=realDt*simPerSec;
+
+  const cv=document.getElementById('intensity'); const {ctx,w,h}=prep(cv,CH_I);
+  const padL=14,padR=12,padT=12,padB=22; const x0=padL,x1=w-padR,y0=h-padB,y1=padT;
+  const halfSpan=mean*0.62, lo=mean-halfSpan, hi=mean+halfSpan;
+  const Y=v=>y0+(1-(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo))*(y1-y0);
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#f0eef0'; for(let g=1;g<=4;g++){const y=y1+(g/5)*(y0-y1);ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();}
+  ctx.strokeStyle='rgba(120,120,128,.5)';ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(x0,Y(mean));ctx.lineTo(x1,Y(mean));ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle=traceColor;ctx.lineWidth=1.3;ctx.beginPath();
+  for(let i=0;i<NPTS;i++){ const t=simClock-windowS+(i/(NPTS-1))*windowS; const v=intensityAt(t,tauC,mean);
+    const x=x0+(i/(NPTS-1))*(x1-x0); const y=Y(v); if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y); }
+  ctx.stroke();
+  ctx.fillStyle='#9a9aa0';ctx.textAlign='center';ctx.font='10px Barlow, sans-serif';
+  ctx.fillText(fmtTime(windowS)+' window',(x0+x1)/2,y0+16);
+  const kcps=Math.round(mean*55);
+  document.getElementById('speedNote').textContent='fluctuation timescale \u2248 '+fmtTime(tauC)+'  \u00b7  \u2248 '+kcps+' kcps';
+
+  drawACF(now);
+  document.getElementById('traceSwatch').style.background=traceColor;
+  document.getElementById('tauAxisNote').textContent='\u03c4 axis '+fmtTime(TAU_MIN)+' \u2192 '+fmtTime(TAU_MAX)+' (log)';
+  requestAnimationFrame(loop);
+}
+
+function drawStats(){
+  const {q,Dt,Gamma,tauC}=recompute(); const sz=fmtSize(diam);
+  document.getElementById('stats').innerHTML=
+    statRow('Diameter', sz.v+' <small>'+sz.u+'</small>')
+   +statRow('Diffusion D', (Dt*1e12).toPrecision(3)+' <small>\u00b5m\u00b2/s</small>')
+   +statRow('Decay rate \u0393', Gamma.toPrecision(3)+' <small>s\u207b\u00b9</small>')
+   +statRow('Corr. time 1/\u0393', fmtTime(tauC))
+   +statRow('q vector', (q/1e6).toFixed(3)+' <small>\u00d710\u2076 m\u207b\u00b9</small>');
+}
+function statRow(k,v){ return '<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; }
+
+
+diam=88e-9; lambda0=640e-9; TAU_MIN=1e-6; TAU_MAX=0.300; traceColor='#333333';
+const opts=[...document.querySelectorAll('.angleopt')];
+function selectAngle(deg){
+  thetaRad=deg*Math.PI/180;
+  opts.forEach(o=>o.classList.toggle('on', +o.dataset.ang===deg));
+  drawStats();
+}
+opts.forEach(o=>{ o.addEventListener('change',()=>selectAngle(+o.dataset.ang));
+                  o.addEventListener('click',()=>{ o.querySelector('input').checked=true; selectAngle(+o.dataset.ang); }); });
+selectAngle(90); drawStats();
+requestAnimationFrame(t=>{lastT=t;loop(t);});
+
+</script>
+</body>
+</html>

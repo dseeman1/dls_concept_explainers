@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Light Scattering Simulator</title>
+<style>
+  :root {
+    --maroon:      #1f1f1f;
+    --maroon-dk:   #000000;
+    --accent:      #333333;
+    --pink:        #9a9a9a;
+    --pink-lt:     #d4d4d4;
+    --ink:         #231f20;
+    --muted:       #6b6f76;
+    --line:        #e4e4e7;
+    --paper:       #ffffff;
+    --bg:          #f4f4f5;
+    --trace:       #333333;
+    --acf:         #2e6b5e;
+  }
+  * { box-sizing: border-box; }
+  html,body { margin:0; }
+  body {
+    font-family: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
+  }
+  .brandbar {
+    background: var(--paper); border-bottom:1px solid var(--line);
+    padding: 12px 20px; display:flex; align-items:center; gap:14px;
+  }
+  .brandbar svg { height:42px; width:auto; display:block; }
+  .brandbar .logolink { display:block; line-height:0; text-decoration:none; border-radius:4px; }
+  .brandbar .logolink:hover { opacity:.82; }
+  .brandbar .tag { margin-left:auto; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--maroon); font-weight:600; }
+  .brandbar .backbtn { margin-left:14px; display:inline-flex; align-items:center; gap:6px;
+    font-family:Barlow,'Segoe UI',sans-serif; font-size:13px; font-weight:600; color:var(--maroon);
+    background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:7px 12px; cursor:pointer; }
+  .brandbar .backbtn:hover { border-color:var(--maroon); background:#f4f4f4; }
+
+  .wrap { margin: 0 auto; padding: 22px 28px 56px; }
+  .intro h1 { font-family: Georgia, serif; font-weight:400; font-size: clamp(22px,4.5vw,30px); color: var(--maroon); margin:4px 0 8px; line-height:1.15; }
+  .intro p { color:#3a3a3d; font-size:14.5px; line-height:1.6; margin:0 0 6px; text-align:justify; }
+  .params { color: var(--muted); font-size:13px; margin-top:8px; text-align:justify; }
+  .params b { color: var(--maroon-dk); }
+
+  .card { background: var(--paper); border:1px solid var(--line); border-radius:6px; padding: 20px; margin: 18px 0; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .card h2 { font-family: Georgia, serif; font-weight:400; font-size:17px; color: var(--maroon); margin:0 0 4px; }
+  .card .sub { color: var(--muted); font-size:12.5px; margin:0 0 14px; text-align:justify; }
+
+  .sizeHead { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .sizeHead .lab { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  .sizeHead .val { font-family:Georgia,serif; font-size:30px; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .sizeHead .unit { color:var(--muted); font-size:14px; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:5px; margin:16px 0 6px; border-radius:5px; outline:none;
+    background: linear-gradient(90deg, var(--maroon) var(--fill,50%), #dcdcdf var(--fill,50%)); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:22px;height:22px;border-radius:50%; background:#fff;border:4px solid var(--maroon);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  input[type=range]::-moz-range-thumb{ width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid var(--maroon);cursor:pointer; }
+  .ticks{ display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+
+  /* particle illustration */
+  /* particle illustration: single row, your-particle on the left */
+  .particlerow { display:flex; align-items:flex-end; justify-content:center; gap:48px; margin:20px 0 4px; flex-wrap:wrap; }
+  .pcell { text-align:center; width:124px; flex:none; }
+  .pcell .dh { font-family:Georgia,serif; font-style:italic; font-size:14px; margin-bottom:8px; }
+  .pwrap { width:124px; height:124px; display:flex; align-items:center; justify-content:center; flex:none; }
+  .particle-you { border-radius:50%; border:2.5px solid #111; background:#fff; box-shadow: inset -6px -6px 14px rgba(0,0,0,.06); }
+  .particle-ref { border-radius:50%; border:2px dashed #555; background: radial-gradient(circle at 35% 30%, var(--pink-lt), var(--pink) 55%, var(--maroon) 100%); }
+  .pcell .speed { font-family:Georgia,serif; font-style:italic; font-size:18px; color:var(--maroon); margin-top:8px; }
+  .pdiv { align-self:stretch; width:1px; background:var(--line); margin:0 4px; }
+
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .stat{ background:var(--paper); padding:12px 14px; }
+  .stat .k{ color:var(--muted); font-size:10px; letter-spacing:.13em; text-transform:uppercase; }
+  .stat .v{ font-size:17px; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .stat .v small{ color:var(--muted); font-size:11px; }
+
+  .plotbox { width:100%; }
+  canvas{ display:block; width:100%; height:auto; }
+  .legend{ display:flex; gap:20px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:8px; }
+  .sw{ display:inline-block; width:14px; height:3px; vertical-align:middle; margin-right:6px; border-radius:2px; }
+  .eqn{ background:#faf6f7; border:1px solid #f0e2e4; border-radius:6px; padding:12px 16px; font-family:Georgia,serif; font-size:15px; color:var(--maroon-dk); text-align:center; margin:0 0 12px;}
+  footer{ color:var(--muted); font-size:11.5px; line-height:1.65; border-top:1px solid var(--line); padding-top:16px; margin-top:8px; }
+  /* two plots side by side on wider screens; stack on mobile */
+  .plotrow{ display:flex; gap:18px; align-items:stretch; max-width:1100px; }
+  .plotrow > .card{ flex:1 1 0; min-width:0; margin:18px 0; }
+  @media (max-width:759px){ .plotrow{ flex-direction:column; gap:0; } }
+  .jumplink{ display:inline-block; margin-top:14px; font-size:12.5px; font-weight:600; color:var(--maroon);
+    text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:6px 12px; }
+  .jumplink:hover{ border-color:var(--maroon); background:#f4f4f4; }
+  html{ scroll-behavior:smooth; }
+</style>
+</head>
+<body>
+  <div class="brandbar">
+    <span class="logolink" aria-hidden="true"></span>
+    <div class="tag">DLS Simulator</div>
+    <button class="backbtn" onclick="history.back()" title="Back to previous page">&larr; Back</button>
+  </div>
+
+  <div class="wrap">
+    <div class="intro">
+      <h1>Watch Brownian motion, size a particle</h1>
+      <p>Particles diffusing through the scattering volume make the detected intensity fluctuate. Small particles diffuse quickly and the signal flickers fast; large particles drift slowly and it varies slowly. The autocorrelation function captures that timescale, and Stokes&ndash;Einstein turns it into a size.</p>
+      <p class="params">Configuration: <b>640&nbsp;nm</b> laser &middot; <b>90&deg;</b> scattering &middot; water at <b>25&nbsp;&deg;C</b> &middot; correlator delay <b>1&nbsp;&micro;s</b> to <b>300&nbsp;ms</b>.</p>
+    </div>
+
+    <div class="card">
+      <div class="particlerow">
+        <div class="pcell">
+          <div class="dh" style="font-size:15px">your particle</div>
+          <div class="pwrap"><div class="particle-you" id="pYou" style="width:60px;height:60px;"></div></div>
+          <div class="speed" id="youSpeed" style="color:var(--accent)">&mdash;</div>
+        </div>
+        <div class="pdiv"></div>
+        <div class="pcell">
+          <div class="dh">small <i>d<sub>h</sub></i></div>
+          <div class="pwrap"><div class="particle-ref" style="width:26px;height:26px;"></div></div>
+          <div class="speed">fast</div>
+        </div>
+        <div class="pcell">
+          <div class="dh">large <i>d<sub>h</sub></i></div>
+          <div class="pwrap"><div class="particle-ref" style="width:80px;height:80px;"></div></div>
+          <div class="speed">slow</div>
+        </div>
+      </div>
+
+      <div class="sizeHead" style="margin-top:18px">
+        <span class="lab">Hydrodynamic diameter</span>
+        <span class="val" id="sizeVal">100</span>
+        <span class="unit" id="sizeUnit">nm</span>
+      </div>
+      <input type="range" id="size" min="0" max="1000" value="500" step="1">
+      <div class="ticks"><span>0.5 nm</span><span>1 &micro;m</span></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+    <a class="jumplink" href="#plots">Jump to graphs &darr;</a>
+
+    <div class="plotrow" id="plots">
+    <div class="card">
+      <h2>Intensity vs. time</h2>
+      <p class="sub">Count-rate history: speckle fluctuations from diffusing particles. Slide the size and watch the flicker speed change.</p>
+      <div class="plotbox"><canvas id="intensity"></canvas></div>
+      <div class="legend"><span><span class="sw" style="background:var(--trace)"></span>I(q, t)</span><span id="speedNote">fluctuation timescale &mdash;</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Autocorrelation function</h2>
+      <p class="sub">The time when decay starts indicates the mean size; the curve shifts right for larger, slower particles.</p>
+      <div class="eqn">g<sup>2</sup>(&tau;) &minus; 1 = &beta; &middot; exp(&minus;2&Gamma;&tau;)&nbsp;&nbsp;,&nbsp;&nbsp; &Gamma; = D<sub>t</sub> &middot; q<sup>2</sup></div>
+      <div class="plotbox"><canvas id="acf"></canvas></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#111"></span>measured g<sup>2</sup>(&tau;) &minus; 1</span>
+        <span><span class="sw" style="background:var(--maroon)"></span>ideal fit</span>
+        <span>&tau; axis 1&nbsp;&micro;s &rarr; 300&nbsp;ms (log)</span>
+      </div>
+    </div>
+    </div>
+
+    <footer>
+      Stokes&ndash;Einstein: D = k<sub>B</sub>T / (3&pi;&eta;d), &eta; = 0.890&nbsp;mPa&middot;s, n = 1.330 (water, 25&nbsp;&deg;C). Scattering vector q = (4&pi;n/&lambda;&#8320;)&middot;sin(&theta;/2). The scattered field is modeled as a sum of detuned sinusoids whose beat timescale scales with the correlation time 1/&Gamma;; intensity is its square. The black curve is the autocorrelation computed live from that simulated signal &mdash; so it jitters and firms up as samples accumulate, the way a real correlator does &mdash; with the ideal exp(&minus;2&Gamma;&tau;) drawn in maroon for reference.
+    </footer>
+  </div>
+
+<script>
+const kB=1.380649e-23, T=298.15, eta=0.890e-3, n=1.330, lambda0=640e-9, theta=Math.PI/2;
+const q=(4*Math.PI*n/lambda0)*Math.sin(theta/2);
+const TAU_MIN=1e-6, TAU_MAX=0.300;
+const D_MIN=0.5e-9, D_MAX=1000e-9;
+function sliderToDiam(s){ return D_MIN*Math.pow(D_MAX/D_MIN, s/1000); }
+
+// ---- sum-of-sines intensity model ----
+// The scattered field is a sum of sinusoids with slightly detuned periods plus a
+// long-period offset. Beats between the detuned terms make an irregular, quasi-random
+// envelope -- a decent stand-in for real DLS speckle. Period scales with size (bigger =
+// slower); amplitude/mean scale with size too (bigger particles scatter much more light).
+const NMODES = 8;
+let modes = [];
+function buildModes(){
+  modes = [];
+  for(let k=0;k<NMODES;k++){
+    modes.push({
+      detune: 0.6 + 1.6*Math.random(),   // freq multiplier, spread around 1
+      phase:  Math.random()*2*Math.PI,
+      amp:    0.5 + Math.random()
+    });
+  }
+  modes.push({ detune: 0.05, phase: Math.random()*2*Math.PI, amp: 1.4 }); // long drift offset
+}
+buildModes();
+
+let diam=100e-9;
+function recompute(){ const Dt=kB*T/(3*Math.PI*eta*diam); const Gamma=Dt*q*q; return {Dt,Gamma,tauC:1/Gamma}; }
+
+// scattering brightness ~ Rayleigh-ish growth with size (clamped so plot stays on-scale).
+// returns a mean-intensity baseline in plot units (~1.2 small -> ~7 large).
+function brightness(){
+  const sliderF = Math.log(diam/D_MIN)/Math.log(D_MAX/D_MIN); // 0..1
+  return 1.2 + 4.6*Math.pow(sliderF, 1.15);
+}
+
+function fmtTime(s){
+  if(s>=1) return s.toFixed(2)+' s';
+  if(s>=1e-3) return (s*1e3).toFixed(2)+' ms';
+  if(s>=1e-6) return (s*1e6).toFixed(2)+' \u00b5s';
+  return (s*1e9).toFixed(1)+' ns';
+}
+function fmtSize(d){ const nm=d*1e9;
+  if(nm>=1000) return {v:(nm/1000).toFixed(3),u:'\u00b5m'};
+  if(nm>=100) return {v:nm.toFixed(0),u:'nm'};
+  if(nm>=10) return {v:nm.toFixed(1),u:'nm'};
+  return {v:nm.toFixed(2),u:'nm'};
+}
+
+// Fixed logical canvas dimensions -> layout never shifts.
+const CW=680, CH_I=150, CH_A=220;
+function prep(cv, hLogical){
+  const dpr=window.devicePixelRatio||1;
+  cv.width=CW*dpr; cv.height=hLogical*dpr;
+  cv.style.aspectRatio = CW+' / '+hLogical;
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w:CW,h:hLogical};
+}
+
+// ---------- intensity time series ----------
+const NPTS=300;
+let simClock=0, lastT=performance.now();
+const MAX_I=10;
+function intensityAt(t, tauC, mean){
+  // Fluctuation as a sum of detuned sinusoids centered on zero, then offset to `mean`.
+  // This is symmetric about the mean (no |field|^2 squaring that skews it upward).
+  const w0=2*Math.PI/(tauC*3);
+  let s=0, norm=0;
+  for(const m of modes){ const w=w0*m.detune;
+    s += m.amp*Math.sin(w*t+m.phase); norm += m.amp; }
+  s/=norm;                              // roughly -1..1, irregular envelope from the beats
+  const depth=0.45*mean;                // fluctuation amplitude scales with brightness
+  return mean + depth*s;
+}
+
+// ---------- ACF: analytic curve + cosmetic "measurement" noise ----------
+// noiseSettle decays the noise the longer the user sits at one size (averaging away).
+let noiseSettle=0;               // 0 = fresh/noisy, ->1 = well averaged
+let lastDiam=diam;
+let acfSeed=Math.random()*1000;
+
+function drawACF(now){
+  const cv=document.getElementById('acf'); const {ctx,w,h}=prep(cv,CH_A); const {Gamma}=recompute();
+  const padL=46,padR=14,padT=12,padB=30;
+  const x0=padL,x1=w-padR,y0=h-padB,y1=padT;
+  const lMin=Math.log10(TAU_MIN),lMax=Math.log10(TAU_MAX);
+  const X=lt=>x0+(lt-lMin)/(lMax-lMin)*(x1-x0);
+  const YY=v=>{ const c=Math.max(-0.08,Math.min(1.12,v)); return y0 + c*(y1-y0); };
+  ctx.clearRect(0,0,w,h);
+  ctx.font='10px Barlow, sans-serif';
+  for(let e=lMin;e<=lMax+1e-9;e++){ const x=X(e);
+    ctx.strokeStyle='#eceaec';ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y0);ctx.stroke();
+    ctx.fillStyle='#9a9aa0';ctx.textAlign='center';
+    const us=Math.pow(10,e)*1e6; let lbl=us>=1e6?(us/1e6)+'s':us>=1e3?(us/1e3)+'ms':us+'\u00b5s';
+    ctx.fillText(lbl,x,y0+16);
+  }
+  for(let g=0;g<=1.0001;g+=0.25){ const y=YY(g);
+    ctx.strokeStyle='#eceaec';ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();
+    ctx.fillStyle='#9a9aa0';ctx.textAlign='right';ctx.fillText(g.toFixed(2),x0-8,y+3);
+  }
+  // measured ACF (black): ideal exp(-2*Gamma*tau) + cosmetic noise.
+  // noise biased toward LONG delay (less averaging there) and shrinks as noiseSettle->1.
+  const t=(now||0)/1000;
+  ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();let first=true;
+  const NPTSC=140;
+  for(let k=0;k<NPTSC;k++){
+    const lt=lMin+(k/(NPTSC-1))*(lMax-lMin);
+    const tau=Math.pow(10,lt);
+    const ideal=Math.exp(-2*Gamma*tau);
+    // longDelayBias: ~0 at short tau, ->1 at long tau
+    const bias=(lt-lMin)/(lMax-lMin);
+    const baseAmp=0.05;                       // overall noise scale
+    const amp=baseAmp*(0.15+1.6*bias)*(1-0.85*noiseSettle);
+    // smooth pseudo-random wiggle (sum of a couple sines on the seed)
+    const ph=acfSeed+lt*7.3;
+    const wig=0.6*Math.sin(ph*3.1+t*0.8)+0.4*Math.sin(ph*7.7+t*1.3)+0.3*Math.sin(ph*1.7-t*0.5);
+    let v=ideal+amp*wig;
+    const y=YY(v); if(first){ctx.moveTo(x0,y);first=false;}else ctx.lineTo(X(lt),y);
+  }
+  ctx.stroke();
+  // ideal fit reference (maroon dashed)
+  ctx.strokeStyle='rgba(40,40,40,.55)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();first=true;
+  for(let px=x0;px<=x1;px++){ const lt=lMin+(px-x0)/(x1-x0)*(lMax-lMin); const tau=Math.pow(10,lt);
+    const v=Math.exp(-2*Gamma*tau); const y=YY(v); if(first){ctx.moveTo(px,y);first=false;}else ctx.lineTo(px,y);}
+  ctx.stroke();ctx.setLineDash([]);
+  // half-decay marker
+  const tHalf=Math.log(2)/(2*Gamma);
+  if(tHalf>=TAU_MIN&&tHalf<=TAU_MAX){ const x=X(Math.log10(tHalf));
+    ctx.strokeStyle='rgba(90,90,90,.5)';ctx.setLineDash([4,4]);ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y0);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#333333';ctx.textAlign='center';ctx.font='10px Barlow, sans-serif';
+    ctx.fillText('\u00bd decay',x,y1+10);
+  }
+}
+
+// ===== main animation loop =====
+function loop(now){
+  const {tauC,Gamma}=recompute();
+  const mean=brightness();
+
+  // reset settling when size changes; otherwise the ACF noise averages away over ~3s
+  if(Math.abs(diam-lastDiam)/lastDiam > 0.001){ noiseSettle=0; lastDiam=diam; acfSeed=Math.random()*1000; }
+  else { noiseSettle = Math.min(1, noiseSettle + (now-lastT)/3000); }
+
+  // simulated window: a few hundred correlation times, capped so motion stays watchable
+  const windowS=Math.min(Math.max(tauC*30,0.04),6);
+  const dtPerPoint=windowS/NPTS;
+  let realDt=(now-lastT)/1000; lastT=now; realDt=Math.min(realDt,0.05);
+  const simPerSec=Math.min(windowS/1.6, 50*dtPerPoint);
+  simClock += realDt*simPerSec;
+
+  // ---- intensity ----
+  const cv=document.getElementById('intensity'); const {ctx,w,h}=prep(cv,CH_I);
+  const padL=14,padR=12,padT=12,padB=22;
+  const x0=padL,x1=w-padR,y0=h-padB,y1=padT;
+  // axis centered on the mean so the symmetric fluctuations fill the plot evenly
+  const halfSpan=mean*0.62;
+  const lo=mean-halfSpan, hi=mean+halfSpan;
+  const Y=v=>y0+(1-(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo))*(y1-y0);
+  ctx.clearRect(0,0,w,h);
+  // faint horizontal gridlines (unlabeled)
+  ctx.strokeStyle='#f0eef0';
+  for(let g=1;g<=4;g++){const y=y1+(g/5)*(y0-y1);ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();}
+  // mean (count rate) line
+  ctx.strokeStyle='rgba(120,120,128,.5)';ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(x0,Y(mean));ctx.lineTo(x1,Y(mean));ctx.stroke();ctx.setLineDash([]);
+  // trace: scrolling window ending at simClock
+  ctx.strokeStyle='#333333';ctx.lineWidth=1.3;ctx.beginPath();
+  for(let i=0;i<NPTS;i++){
+    const t=simClock - windowS + (i/(NPTS-1))*windowS;
+    const v=intensityAt(t,tauC,mean);
+    const x=x0+(i/(NPTS-1))*(x1-x0); const y=Y(v);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.fillStyle='#9a9aa0';ctx.textAlign='center';ctx.font='10px Barlow, sans-serif';
+  ctx.fillText(fmtTime(windowS)+' window',(x0+x1)/2,y0+16);
+  const kcps=Math.round(mean*55);  // illustrative count rate
+  document.getElementById('speedNote').textContent='fluctuation timescale \u2248 '+fmtTime(tauC)+'  \u00b7  \u2248 '+kcps+' kcps';
+
+  // ---- ACF ----
+  drawACF(now);
+
+  requestAnimationFrame(loop);
+}
+
+function drawStats(){
+  const {Dt,Gamma,tauC}=recompute(); const sz=fmtSize(diam);
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="k">Diameter</div><div class="v">${sz.v} <small>${sz.u}</small></div></div>
+    <div class="stat"><div class="k">Diffusion D</div><div class="v">${(Dt*1e12).toPrecision(3)} <small>\u00b5m\u00b2/s</small></div></div>
+    <div class="stat"><div class="k">Decay rate \u0393</div><div class="v">${Gamma.toPrecision(3)} <small>s\u207b\u00b9</small></div></div>
+    <div class="stat"><div class="k">Corr. time 1/\u0393</div><div class="v">${fmtTime(tauC)}</div></div>
+    <div class="stat"><div class="k">q vector</div><div class="v">${(q/1e6).toFixed(3)} <small>\u00d710\u2076 m\u207b\u00b9</small></div></div>`;
+}
+
+const slider=document.getElementById('size');
+function speedWord(frac){
+  // frac 0..1 across the log size range -> fast (small) to slow (large)
+  if(frac<0.18) return 'very fast';
+  if(frac<0.40) return 'fast';
+  if(frac<0.62) return 'medium';
+  if(frac<0.84) return 'slow';
+  return 'very slow';
+}
+function onSlider(){
+  const f=+slider.value/1000;
+  diam=sliderToDiam(+slider.value); const sz=fmtSize(diam);
+  document.getElementById('sizeVal').textContent=sz.v;
+  document.getElementById('sizeUnit').textContent=sz.u;
+  slider.style.setProperty('--fill',(slider.value/10)+'%');
+  const px=28+f*92;  // 28..120 px
+  document.getElementById('pYou').style.width=px+'px';
+  document.getElementById('pYou').style.height=px+'px';
+  document.getElementById('youSpeed').textContent=speedWord(f);
+  drawStats();
+}
+slider.addEventListener('input',onSlider);
+window.addEventListener('resize',()=>{drawStats();});
+onSlider();
+requestAnimationFrame(t=>{lastT=t;loop(t);});
+</script>
+</body>
+</html>
