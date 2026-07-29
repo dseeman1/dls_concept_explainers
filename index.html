@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLS Explainer Suite</title>
+<style>
+  :root{
+    --ink:#1f1f1f; --muted:#6b6f76; --line:#e4e4e7;
+    --paper:#ffffff; --bg:#f4f4f4; --accent:#DFAF20; --accent-dk:#C2940A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Barlow","Segoe UI","Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.55;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:56px 24px 80px;}
+  header{border-bottom:3px solid var(--ink); padding-bottom:22px; margin-bottom:8px;}
+  .eyebrow{
+    font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--accent-dk); margin:0 0 10px;
+  }
+  h1{font-size:40px; line-height:1.1; margin:0 0 14px; font-weight:700; letter-spacing:-.5px;}
+  .lede{font-size:17px; color:#333; max-width:66ch; margin:0;}
+  .byline{margin:18px 0 0; font-size:14px; color:var(--muted);}
+  .byline a{color:var(--accent-dk); text-decoration:none; border-bottom:1px solid transparent;}
+  .byline a:hover{border-bottom-color:var(--accent-dk);}
+
+  .grid{margin-top:38px; display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px;}
+  a.card{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:20px 20px 18px; transition:border-color .15s, transform .15s, box-shadow .15s;
+    position:relative;
+  }
+  a.card:hover{
+    border-color:var(--accent); transform:translateY(-2px);
+    box-shadow:0 6px 20px rgba(0,0,0,.06);
+  }
+  a.card::before{
+    content:""; position:absolute; left:0; top:16px; bottom:16px; width:3px;
+    background:var(--accent); border-radius:3px; opacity:0; transition:opacity .15s;
+  }
+  a.card:hover::before{opacity:1;}
+  .card .num{
+    font-size:12px; font-weight:700; letter-spacing:.1em; color:var(--accent-dk);
+    margin-bottom:8px;
+  }
+  .card h2{font-size:18px; margin:0 0 6px; font-weight:700; line-height:1.25;}
+  .card p{font-size:14px; color:var(--muted); margin:0;}
+
+  .section-label{
+    margin:34px 0 2px; font-size:12px; font-weight:600; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  footer{
+    margin-top:52px; padding-top:22px; border-top:1px solid var(--line);
+    font-size:13px; color:var(--muted);
+  }
+  footer code{background:#ececec; padding:1px 6px; border-radius:4px; font-size:12px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="eyebrow">Interactive Physics · Dynamic Light Scattering</p>
+      <h1>DLS Explainer Suite</h1>
+      <p class="lede">Self-contained, interactive pages that illustrate the physics of Dynamic Light Scattering. Each one isolates a single variable and shows, in real time, how it shapes the scattered-intensity history and the resulting autocorrelation function.</p>
+      <p class="byline">Built by <strong>Daniel P. Seeman, Ph.D.</strong> — <a href="https://about.me/danielseeman">about.me/danielseeman</a></p>
+    </header>
+
+    <div class="grid">
+      <a class="card" href="dls-explainer-big-small-particles.html">
+        <div class="num">01</div>
+        <h2>Particle Size</h2>
+        <p>Watch Brownian motion set the fluctuation timescale, and size a particle from the autocorrelation decay.</p>
+      </a>
+      <a class="card" href="dls-explainer-wavelength.html">
+        <div class="num">02</div>
+        <h2>Laser Wavelength</h2>
+        <p>How the beam wavelength sets the scattering vector q and the decay rate. The trace is colored to the beam.</p>
+      </a>
+      <a class="card" href="dls-explainer-angle-goniometer.html">
+        <div class="num">03</div>
+        <h2>Scattering Angle · Goniometer</h2>
+        <p>Sweep the detection angle continuously (8°–155°) and see the decay rate shift as q².</p>
+      </a>
+      <a class="card" href="dls-explainer-angle-benchtop.html">
+        <div class="num">04</div>
+        <h2>Fixed Angles · Benchtop</h2>
+        <p>Compare forward (15°), right-angle (90°), and backscatter (173°) detection on a benchtop instrument.</p>
+      </a>
+      <a class="card" href="dls-explainer-delay-times.html">
+        <div class="num">05</div>
+        <h2>Correlator Delay Window</h2>
+        <p>Set the first and last delay times and see the range of dynamics a correlator can actually resolve.</p>
+      </a>
+    </div>
+
+    <p class="section-label">For builders</p>
+    <div class="grid">
+      <a class="card" href="dls-explainer-template.html">
+        <div class="num">＋</div>
+        <h2>Blank Template</h2>
+        <p>An empty scaffold — layout, styling, and shared physics helpers — for building a new explainer page.</p>
+      </a>
+    </div>
+
+    <footer>
+      Every page is a single HTML file: no build step, no dependencies, no network calls. Open any file directly, or view the source on GitHub. Physics shared across all pages: <code>D = k_B·T / (3πηd)</code>, <code>q = (4πn/λ₀)·sin(θ/2)</code>, <code>Γ = D·q²</code>.
+    </footer>
+  </div>
+</body>
+</html>
